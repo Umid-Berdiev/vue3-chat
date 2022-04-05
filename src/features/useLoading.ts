@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 const loading = ref(false);
 
 export default () => {
-  function setLoading(value) {
+  function setLoading(value:boolean) {
     console.log('setting loading:');
     loading.value = value;
     console.log(loading.value);

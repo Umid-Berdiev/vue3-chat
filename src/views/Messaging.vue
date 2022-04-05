@@ -21,15 +21,16 @@ onMounted(async () => {
 
 });
 
-function sendMsg() {
+async function sendMsg() {
   const text = messageInput.value.value;
-  msgGeneration(text, "Client");
-  sendEvent(text);
+  messageInput.value.value = ''
+  msgGeneration(text, "Me");
+  await sendEvent({ message: text, user_id: 2 });
 }
 
 function msgGeneration(msg: any, from: string) {
   const newMessage = document.createElement("h5");
-  newMessage.innerText = `${from} says: ${msg}`;
+  newMessage.innerText = `${from}: ${msg}`;
   messageBox.value.appendChild(newMessage);
 }
 

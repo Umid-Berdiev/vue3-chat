@@ -2,7 +2,7 @@ import { computed, ref } from "vue";
 import { getToken } from "@/api/config";
 
 const token = getToken();
-const wsUrl = "ws://localhost:8889/connect";
+const wsUrl = "ws://localhost:8888/connect";
 const wsConnect = ref(null);
 const wsMessages = ref([]);
 
@@ -48,11 +48,9 @@ export default () => {
   };
 
   const sendEvent = async (payload: any) => {
-    console.log("in sendEvent func..");
-
     if (wsConnect.value.readyState !== wsConnect.value.OPEN) {
       try {
-        await waitForOpenConnection(wsConnect.value);
+        await waitForOpenConnection();
         wsConnect.value.send(payload);
       } catch (err) {
         console.error("Error while sending event via websocket: ", err);

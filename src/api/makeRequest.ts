@@ -1,8 +1,6 @@
 import axios from "axios";
 import * as config from "./config";
 
-axios.default.BASE_URL = "http://localhost:8889";
-
 export default async ({
   url = "/",
   method = "get",

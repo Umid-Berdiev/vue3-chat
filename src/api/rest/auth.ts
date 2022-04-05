@@ -18,7 +18,7 @@ export const signup = async (payload) => {
 export const login = async ({ email, password }) => {
   try {
     const res = await makeRequest({
-      url: "http://localhost:8889/login",
+      url: "/api/login",
       method: "post",
       data: {
         email,
