@@ -12,9 +12,9 @@ export default () => {
     wsConnect.value.addEventListener("open", (event) => {
       console.log("Successfully connected to the websocket server...");
     });
-    wsConnect.value.addEventListener("message", (event) =>
-      handleNewMessage(event)
-    );
+    // wsConnect.value.addEventListener("message", (event) =>
+    //   handleNewMessage(event)
+    // );
     wsConnect.value.addEventListener("close", (event) => {
       console.error("Websocket closed unexpectedly: ", event);
     });
@@ -57,13 +57,13 @@ export default () => {
     ) {
       try {
         await waitForOpenConnection();
-        wsConnect.value.send(payload);
+        wsConnect.value.send(JSON.stringify(payload));
       } catch (err) {
         console.error("Error while sending event via websocket: ", err);
         console.error(err);
       }
     } else {
-      wsConnect.value && wsConnect.value.send(payload);
+      wsConnect.value && wsConnect.value.send(JSON.stringify(payload));
     }
   };
 
