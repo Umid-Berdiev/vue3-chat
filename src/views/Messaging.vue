@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import useWebSocket from '@/features/useWebSocket'
 
 const { setConnection, getConnection, sendEvent } = useWebSocket()
-const messageBox = ref(null);
-const messageInput = ref(null);
-const sendBtn = ref(null);
+const messageBox = ref<HTMLDivElement>();
+const messageInput = ref<string>('');
+const sendBtn = ref<HTMLButtonElement>();
+const isInputEmpty = computed(() => messageInput.value == '' ? true : false)
 
 onMounted(async () => {
   await setConnection()
@@ -22,19 +23,17 @@ onMounted(async () => {
 });
 
 async function sendMsg() {
-  const text = messageInput.value.value;
-  messageInput.value.value = ''
+  const text = messageInput.value;
+  messageInput.value = ''
   msgGeneration(text, "Me");
-  await sendEvent({ message: text, user_id: 2 });
+  await sendEvent(text);
 }
 
 function msgGeneration(msg: any, from: string) {
-  const newMessage = document.createElement("h5");
+  const newMessage = document.createElement("p");
   newMessage.innerText = `${from}: ${msg}`;
-  messageBox.value.appendChild(newMessage);
+  messageBox.value && messageBox.value.appendChild(newMessage);
 }
-
-
 
 </script>
 
@@ -43,9 +42,9 @@ function msgGeneration(msg: any, from: string) {
     <h1>Messaging box</h1>
     <form @submit.prevent="sendMsg">
       <div ref="messageBox"></div>
-      <input type="text" ref="messageInput" />
+      <input type="text" v-model="messageInput" />
       <br />
-      <button ref="sendBtn">Send Message</button>
+      <button ref="sendBtn" :disabled="isInputEmpty">Send Message</button>
     </form>
   </main>
 </template>

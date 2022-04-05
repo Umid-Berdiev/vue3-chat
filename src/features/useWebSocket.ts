@@ -3,7 +3,7 @@ import { getToken } from "@/api/config";
 
 const token = getToken();
 const wsUrl = "ws://localhost:8888/connect";
-const wsConnect = ref(null);
+const wsConnect = ref<WebSocket>();
 const wsMessages = ref([]);
 
 export default () => {
@@ -23,7 +23,7 @@ export default () => {
   const waitForOpenConnection = () => {
     // We use this to measure how many times we have tried to connect to the websocket server
     // If it fails, it throws an error.
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       const maxNumberOfAttempts = 10;
       const intervalTime = 200;
 
@@ -32,7 +32,10 @@ export default () => {
         if (currentAttempt > maxNumberOfAttempts - 1) {
           clearInterval(interval);
           reject(new Error("Maximum number of attempts exceeded."));
-        } else if (wsConnect.value.readyState === wsConnect.value.OPEN) {
+        } else if (
+          wsConnect.value &&
+          wsConnect.value.readyState === wsConnect.value.OPEN
+        ) {
           clearInterval(interval);
           resolve();
         }
@@ -41,14 +44,17 @@ export default () => {
     });
   };
 
-  const handleNewMessage = (event) => {
+  const handleNewMessage = (event: any) => {
     const data = JSON.parse(event.data);
     const message = data.message;
     wsMessages.value.push(message);
   };
 
   const sendEvent = async (payload: any) => {
-    if (wsConnect.value.readyState !== wsConnect.value.OPEN) {
+    if (
+      wsConnect.value &&
+      wsConnect.value.readyState !== wsConnect.value.OPEN
+    ) {
       try {
         await waitForOpenConnection();
         wsConnect.value.send(payload);
@@ -57,7 +63,7 @@ export default () => {
         console.error(err);
       }
     } else {
-      wsConnect.value.send(payload);
+      wsConnect.value && wsConnect.value.send(payload);
     }
   };
 
