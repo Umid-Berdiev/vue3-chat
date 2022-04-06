@@ -2,13 +2,14 @@ import { computed, ref } from "vue";
 import { getToken } from "@/api/config";
 
 const token = getToken();
-const wsUrl = "ws://localhost:8888/connect";
+const wsUrl = "ws://localhost:8887/connect";
 const wsConnect = ref<WebSocket>();
 const wsMessages = ref([]);
 
 export default () => {
   const setConnection = () => {
     wsConnect.value = new WebSocket(`${wsUrl}/?token=${token}`);
+    // wsConnect.value.binaryType = "arraybuffer";
     wsConnect.value.addEventListener("open", (event) => {
       console.log("Successfully connected to the websocket server...");
     });
@@ -57,13 +58,13 @@ export default () => {
     ) {
       try {
         await waitForOpenConnection();
-        wsConnect.value.send(JSON.stringify(payload));
+        wsConnect.value.send(payload);
       } catch (err) {
         console.error("Error while sending event via websocket: ", err);
         console.error(err);
       }
     } else {
-      wsConnect.value && wsConnect.value.send(JSON.stringify(payload));
+      wsConnect.value && wsConnect.value.send(payload);
     }
   };
 
