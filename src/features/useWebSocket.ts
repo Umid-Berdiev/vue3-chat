@@ -2,20 +2,17 @@ import { computed, ref } from "vue";
 import { getToken } from "@/api/config";
 
 const token = getToken();
-const wsUrl = "ws://localhost:8887/connect";
+const wsUrl = "ws://localhost:8888/";
 const wsConnect = ref<WebSocket>();
 const wsMessages = ref([]);
 
 export default () => {
   const setConnection = () => {
-    wsConnect.value = new WebSocket(`${wsUrl}/?token=${token}`);
-    // wsConnect.value.binaryType = "arraybuffer";
+    wsConnect.value = new WebSocket(`${wsUrl}?token=${token}`, "echo-protocol");
+    wsConnect.value.binaryType = "arraybuffer";
     wsConnect.value.addEventListener("open", (event) => {
       console.log("Successfully connected to the websocket server...");
     });
-    // wsConnect.value.addEventListener("message", (event) =>
-    //   handleNewMessage(event)
-    // );
     wsConnect.value.addEventListener("close", (event) => {
       console.error("Websocket closed unexpectedly: ", event);
     });
@@ -45,12 +42,6 @@ export default () => {
     });
   };
 
-  const handleNewMessage = (event: any) => {
-    const data = JSON.parse(event.data);
-    const message = data.message;
-    wsMessages.value.push(message);
-  };
-
   const sendEvent = async (payload: any) => {
     if (
       wsConnect.value &&
@@ -58,13 +49,15 @@ export default () => {
     ) {
       try {
         await waitForOpenConnection();
-        wsConnect.value.send(payload);
+        wsConnect.value.send(payload.payload);
+        // checkDataBeforeSend(payload);
       } catch (err) {
         console.error("Error while sending event via websocket: ", err);
         console.error(err);
       }
     } else {
-      wsConnect.value && wsConnect.value.send(payload);
+      wsConnect.value && wsConnect.value.send(payload.payload);
+      // checkDataBeforeSend(payload);
     }
   };
 

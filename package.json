@@ -12,10 +12,12 @@
     "axios": "^0.26.1",
     "lodash": "^4.17.21",
     "vue": "^3.2.31",
-    "vue-router": "^4.0.14"
+    "vue-router": "^4.0.14",
+    "websocket": "^1.0.34"
   },
   "devDependencies": {
     "@types/node": "^16.11.26",
+    "@types/websocket": "^1.0.5",
     "@vitejs/plugin-vue": "^2.3.1",
     "@vue/tsconfig": "^0.1.3",
     "typescript": "^4.6.3",

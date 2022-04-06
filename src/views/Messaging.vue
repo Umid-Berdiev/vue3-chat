@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+// import { setConnection } from '@/features/useWebSocket'
 import useWebSocket from '@/features/useWebSocket'
-import { each } from 'lodash'
 
-const { setConnection, getConnection, sendEvent } = useWebSocket()
+const { setConnection, getConnection, } = useWebSocket()
 const messageBox = ref<HTMLDivElement>();
 const messageInput = ref<string>('');
 const inputTag = ref<HTMLInputElement>();
@@ -17,27 +17,28 @@ onMounted(async () => {
 
   if (getConnection.value)
     getConnection.value.onmessage = (event: any) => {
-      console.log('event in onmessage event', event);
       const { data } = event;
-      // const data = JSON.parse(event.data);
-      console.log('data in onmessage event', data);
+      if (data instanceof ArrayBuffer) {
+        // const blob = new File([data], "filename")
+        // const arrayBuffer = data;
+        // const bytes = new Uint8Array(arrayBuffer);
+        // const blob = new Blob([bytes.buffer])
 
-      // if (event.data instanceof Blob) {
-      if (data.type === 'attachment') {
-        var arrayBufferView = new Uint8Array(data.payload);
-        let blob = new Blob([arrayBufferView.buffer]);
-        // let blob = new Blob([data.payload]);
+        // const bytes = new Uint8Array(data);
+        // const blob = new Blob([bytes.buffer]);
 
         msgGeneration({
           type: 'attachment',
-          data: blob
+          payload: blob
         }, "Server");
 
-      } else
+
+      } else {
         msgGeneration({
           type: 'text',
-          data: JSON.parse(data.toString()).payload
+          payload: data
         }, "Server");
+      }
     };
 
 });
@@ -48,12 +49,11 @@ async function sendMsg() {
   inputTag.value?.focus()
   const obj = {
     type: 'text',
-    data: text
+    payload: text
   }
   msgGeneration(obj, "Me");
-  getConnection.value?.send(JSON.stringify({
-    type: 'text', payload: text
-  }));
+  getConnection.value && getConnection.value.send(text);
+  // sendEvent(obj);
 }
 
 function msgGeneration(msg: any, from: string) {
@@ -64,15 +64,19 @@ function msgGeneration(msg: any, from: string) {
   imgTag.height = 50
 
   if (msg.type === 'text') {
-    newMessage.innerText = `${from}: ${msg.data}`;
+    newMessage.innerText = `${from}: ${msg.payload}`;
     messageBox.value && messageBox.value.appendChild(newMessage);
   }
 
   if (msg.type === 'attachment') {
     const spanTag = document.createElement("span");
     spanTag.innerHTML = `${from}: `
-    // imgTag.src = 'data:image/png;base64,' + msg.data.toString();
-    imgTag.src = URL.createObjectURL(msg.data);
+    // const urlCreator = window.URL || window.webkitURL;
+    // const imageUrl = urlCreator.createObjectURL(msg.payload);
+    // imgTag.src = imageUrl;
+    // imgTag.src = 'data:image/jpeg;base64,' + customEncode(msg.payload);
+    imgTag.src = URL.createObjectURL(msg.payload);
+    // imgTag.src = msg.payload;
     newMessage.appendChild(spanTag)
     newMessage.appendChild(imgTag)
     messageBox.value && messageBox.value.appendChild(newMessage);
@@ -98,19 +102,25 @@ function handleFileInput(e: any) {
   reader.onload = function (event) {
     rawData = event.target?.result
 
-    msgGeneration({
-      type: 'attachment',
-      data: file
-    }, "Me")
-
-    getConnection.value?.send(JSON.stringify({
+    const obj = {
       type: 'attachment',
       payload: file
-    }))
+    }
+
+    msgGeneration(obj, "Me")
+    // sendEvent(obj)
   }
 
   reader.readAsArrayBuffer(file);
+  getConnection.value && getConnection.value.send(rawData);
+}
 
+function blobToBase64(blob: Blob) {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
 }
 
 </script>
