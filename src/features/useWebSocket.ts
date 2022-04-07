@@ -9,7 +9,7 @@ const wsMessages = ref([]);
 export default () => {
   const setConnection = () => {
     wsConnect.value = new WebSocket(`${wsUrl}?token=${token}`, "echo-protocol");
-    wsConnect.value.binaryType = "arraybuffer";
+    // wsConnect.value.binaryType = "arraybuffer";
     wsConnect.value.addEventListener("open", (event) => {
       console.log("Successfully connected to the websocket server...");
     });
@@ -49,14 +49,14 @@ export default () => {
     ) {
       try {
         await waitForOpenConnection();
-        wsConnect.value.send(payload.payload);
+        wsConnect.value.send(payload);
         // checkDataBeforeSend(payload);
       } catch (err) {
         console.error("Error while sending event via websocket: ", err);
         console.error(err);
       }
     } else {
-      wsConnect.value && wsConnect.value.send(payload.payload);
+      wsConnect.value && wsConnect.value.send(payload);
       // checkDataBeforeSend(payload);
     }
   };

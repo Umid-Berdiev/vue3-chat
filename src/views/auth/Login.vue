@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { login } from '@/api';
 
-console.log('login page');
-
 async function handleSubmit(event: { preventDefault: () => void; target: any; }) {
   const values = Object.fromEntries(new FormData(event.target))
   // console.log('values: ', values);
@@ -18,5 +16,7 @@ async function handleSubmit(event: { preventDefault: () => void; target: any; })
     <input type="password" name="password" />
     <br />
     <button type="submit">submit</button>
+    no account?
+    <RouterLink to="/auth/signup">signup</RouterLink>
   </form>
 </template>

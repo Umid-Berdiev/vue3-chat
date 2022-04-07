@@ -1,21 +1,24 @@
 <script setup lang="ts">
-function handleSubmit(event: Event) {
+import { signup } from '@/api';
+
+async function handleSubmit(event: { preventDefault: () => void; target: any; }) {
   const values = Object.fromEntries(new FormData(event.target))
-  console.log('values: ', values);
+  // console.log('values: ', values);
+  await signup(values)
+  window.location = "/"
 }
 </script>
 
 <template>
-<div>
-  <form @submit.prevent="handleSubmit" >
-  <input type="text" name="username">
-  <br>
-  <input type="email" name="email">
-  <br>
-  <input type="password" name="password">
-  <br>
-  <button type="submit">submit</button>
-  </form>
-
-</div>
+  <div>
+    <form @submit.prevent="handleSubmit">
+      <input type="text" required name="username" placeholder="username" />
+      <br />
+      <input type="email" required name="email" placeholder="email" />
+      <br />
+      <input type="password" required name="password" placeholder="password" />
+      <br />
+      <button type="submit">submit</button>
+    </form>
+  </div>
 </template>

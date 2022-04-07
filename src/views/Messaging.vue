@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-// import { setConnection } from '@/features/useWebSocket'
 import useWebSocket from '@/features/useWebSocket'
 
-const { setConnection, getConnection, } = useWebSocket()
+const { setConnection, getConnection, sendEvent } = useWebSocket()
 const messageBox = ref<HTMLDivElement>();
 const messageInput = ref<string>('');
 const inputTag = ref<HTMLInputElement>();
@@ -15,24 +14,20 @@ onMounted(async () => {
   inputTag.value?.focus()
   setConnection()
 
-  if (getConnection.value)
+  if (getConnection.value) {
+    getConnection.value.binaryType = "arraybuffer";
     getConnection.value.onmessage = (event: any) => {
       const { data } = event;
+
       if (data instanceof ArrayBuffer) {
         // const blob = new File([data], "filename")
-        // const arrayBuffer = data;
-        // const bytes = new Uint8Array(arrayBuffer);
-        // const blob = new Blob([bytes.buffer])
-
-        // const bytes = new Uint8Array(data);
-        // const blob = new Blob([bytes.buffer]);
+        const bytes = new Uint8Array(data);
+        const blob = new Blob([bytes]);
 
         msgGeneration({
           type: 'attachment',
           payload: blob
         }, "Server");
-
-
       } else {
         msgGeneration({
           type: 'text',
@@ -41,7 +36,9 @@ onMounted(async () => {
       }
     };
 
+  }
 });
+
 
 async function sendMsg() {
   const text = messageInput.value;
@@ -52,12 +49,10 @@ async function sendMsg() {
     payload: text
   }
   msgGeneration(obj, "Me");
-  getConnection.value && getConnection.value.send(text);
-  // sendEvent(obj);
+  sendEvent(text);
 }
 
 function msgGeneration(msg: any, from: string) {
-  // const obj = JSON.parse(msg)
   const newMessage = document.createElement("p");
   const imgTag = document.createElement("img");
   imgTag.width = 100
@@ -71,12 +66,9 @@ function msgGeneration(msg: any, from: string) {
   if (msg.type === 'attachment') {
     const spanTag = document.createElement("span");
     spanTag.innerHTML = `${from}: `
-    // const urlCreator = window.URL || window.webkitURL;
-    // const imageUrl = urlCreator.createObjectURL(msg.payload);
-    // imgTag.src = imageUrl;
-    // imgTag.src = 'data:image/jpeg;base64,' + customEncode(msg.payload);
+
     imgTag.src = URL.createObjectURL(msg.payload);
-    // imgTag.src = msg.payload;
+
     newMessage.appendChild(spanTag)
     newMessage.appendChild(imgTag)
     messageBox.value && messageBox.value.appendChild(newMessage);
@@ -108,11 +100,10 @@ function handleFileInput(e: any) {
     }
 
     msgGeneration(obj, "Me")
-    // sendEvent(obj)
   }
 
   reader.readAsArrayBuffer(file);
-  getConnection.value && getConnection.value.send(rawData);
+  sendEvent(file);
 }
 
 function blobToBase64(blob: Blob) {
@@ -131,9 +122,8 @@ function blobToBase64(blob: Blob) {
     <form @submit.prevent="sendMsg">
       <div ref="messageBox"></div>
       <input ref="inputTag" type="text" v-model="messageInput" />
-      <input type="file" @change="handleFileInput" />
-      <br />
       <button ref="sendBtn" :disabled="isInputEmpty">Send Message</button>
+      <input style="margin-left: 1rem;" type="file" @change="handleFileInput" />
     </form>
   </main>
 </template>

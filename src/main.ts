@@ -3,7 +3,6 @@ import App from "./App.vue";
 import router from "./router";
 import axios from "axios";
 
-console.log("ok0");
 axios.interceptors.response.use(undefined, async function (error) {
   console.log("ok1");
 
